@@ -4,12 +4,22 @@ import { motion } from 'framer-motion'
 import './index.css'
 import ThreeScene from './components/ThreeScene'
 import { Parallax } from 'react-scroll-parallax'
-
-
+import React, { useState, useEffect } from 'react'
+import MorphingText from './components/MorphingText';
 
 
 
 function App() {
+  const phrases = ["Developer", "Designer", "Creator"];
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIndex((prev) => (prev + 1) % phrases.length);
+    }, 2000); // Change every 2 seconds
+    return () => clearTimeout(timeout);
+  }, [index]);
+
   return (
     <div className="min-h-screen w-screen bg-gray-900 text-white flex flex-col">
       {/* Navbar */}
@@ -24,28 +34,20 @@ function App() {
 
       {/* Hero */}
       <div className='relative z-10'>
-<Parallax speed={-10}>
-  <header className="flex flex-col items-center justify-center h-screen text-center p-6">
-    <motion.h2
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 1 }}
-      className="text-6xl font-extrabold"
-    >
-      Welcome to My World
-    </motion.h2>
-    <motion.p
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.5, duration: 1 }}
-      className="max-w-xl text-gray-300"
-    >
-      I'm Elias — a developer who codes like he kicks: with power, precision, and passion.
-    </motion.p>
-  </header>
-</Parallax>
+  <Parallax speed={-10}>
+    <header className="flex flex-col items-center justify-center h-screen text-center p-6">
+      {/* Static intro text */}
+      <h3 className="text-2xl md:text-3xl font-semibold mb-4 z-10 relative">
+        Hey, I'm Elias Oliphant!
+      </h3>
+      {/* Morphing text below */}
+      <div className="w-full flex justify-center items-center">
+        <MorphingText />
       </div>
-      
+    </header>
+  </Parallax>
+</div>
+
 
       {/* 3D Canvas */}
       <section className="w-full h-[80vh]">

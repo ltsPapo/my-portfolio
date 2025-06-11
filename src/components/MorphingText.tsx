@@ -1,9 +1,13 @@
 import React, { useRef, useEffect } from "react";
 
 const texts = [
-  "Developer.",
-  "Martial Artist.",
-  "Creator.",
+  "Software Developer",
+  "Martial Artist",
+  "Music Lover",
+  "Student",
+  "Gamer",
+  "Runner",
+  "Coder"
 ];
 
 const morphTime = 1;

@@ -4,6 +4,7 @@ import { useRef } from 'react'
 import * as THREE from 'three'
 import BanjoWave from './banjoWave'
 import CustomModel from './CustomModel'
+import PalmTree from './palmTree'
 
 function ParallaxCamera() {
   const cameraRef = useRef<THREE.PerspectiveCamera>(null)
@@ -27,7 +28,7 @@ function ParallaxCamera() {
       ref={cameraRef}
       makeDefault
       position={[0, 2, -8]}
-      fov={40}
+      fov={30}
     />
   )
 }
@@ -40,7 +41,7 @@ export default function ThreeScene() {
       <directionalLight position={[5, 5, 5]} />
       <CustomModel />
       <BanjoWave />
-      <Stars />
+      <PalmTree />
     </Canvas>
   )
 }

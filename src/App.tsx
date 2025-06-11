@@ -34,23 +34,23 @@ function App() {
 
       {/* Hero */}
       <div className='relative z-10'>
-  <Parallax speed={-10}>
-    <header className="flex flex-col items-center justify-center h-screen text-center p-6">
-      {/* Static intro text */}
-      <h3 className="text-2xl md:text-3xl font-semibold mb-4 z-10 relative">
-        Hey, I'm Elias Oliphant!
-      </h3>
-      {/* Morphing text below */}
-      <div className="w-full flex justify-center items-center">
-        <MorphingText />
+        <Parallax speed={-10}>
+          <header className="flex flex-col items-center justify-start h-[45vh] text-center pt-12 px-6">
+            {/* Static intro text */}
+            <h3 className="text-2xl md:text-3xl font-semibold mb-4 z-10 relative">
+              Hey, I'm Elias Oliphant!
+            </h3>
+            {/* Morphing text below */}
+            <div className="w-full flex justify-center items-center">
+              <MorphingText />
+            </div>
+          </header>
+        </Parallax>
       </div>
-    </header>
-  </Parallax>
-</div>
 
 
       {/* 3D Canvas */}
-      <section className="w-full h-[80vh]">
+      <section className="w-full h-[58vh] -mt-24 z-0 relative">
         <ThreeScene />
       </section>
     </div>

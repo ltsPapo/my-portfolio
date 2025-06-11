@@ -1,10 +1,13 @@
 import { Canvas, useFrame } from '@react-three/fiber'
-import { PerspectiveCamera, Stars } from '@react-three/drei'
+import { PerspectiveCamera} from '@react-three/drei'
 import { useRef } from 'react'
 import * as THREE from 'three'
 import BanjoWave from './banjoWave'
 import CustomModel from './CustomModel'
 import PalmTree from './palmTree'
+import { SunModel, MoonModel } from './SkyModels'
+
+
 
 function ParallaxCamera() {
   const cameraRef = useRef<THREE.PerspectiveCamera>(null)
@@ -41,6 +44,8 @@ export default function ThreeScene() {
       <directionalLight position={[5, 5, 5]} />
       <CustomModel />
       <BanjoWave />
+      <SunModel />
+      <MoonModel />
       <PalmTree />
     </Canvas>
   )

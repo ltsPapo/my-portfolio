@@ -21,7 +21,7 @@ function App() {
   }, [index]);
 
   return (
-    <div className="min-h-screen w-screen bg-gray-900 text-white flex flex-col">
+    <div className="relative z-10 min-h-screen w-screen bg-transparent text-white flex flex-col">
       {/* Navbar */}
       <nav className="p-4 flex justify-between items-center border-b border-gray-700">
         <h1 className="text-2xl font-bold">Elias Oliphant</h1>
@@ -50,7 +50,7 @@ function App() {
 
 
       {/* 3D Canvas */}
-      <section className="w-full h-[58vh] -mt-24 z-0 relative">
+      <section className="fixed inset-0 z-0">
         <ThreeScene />
       </section>
     </div>

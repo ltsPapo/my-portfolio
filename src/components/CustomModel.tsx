@@ -12,7 +12,7 @@ export default function CustomModel() {
       object={gltf.scene}
       scale={0.08}              // Try 0.1 to 1 depending on size
       position={[0, -1.5, 0]}  // Lower the model slightly
-      rotation={[0, Math.PI, 0]} // Optional: rotate to face front
+      rotation={[0, 0, 0]} // Optional: rotate to face front
     />
   )
 }

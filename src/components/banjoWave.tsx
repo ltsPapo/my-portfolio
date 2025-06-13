@@ -24,5 +24,5 @@ export default function BanjoWave() {
     mixerRef.current?.update(delta)
   })
 
-  return <primitive object={scene} scale={1} position={[1, -1.30, -1.3]} rotation={[0, Math.PI, 0]} ref={ref} />
+  return <primitive object={scene} scale={1} position={[-1, -1.30, 1.3]} rotation={[0, 0, 0]} ref={ref} />
 }

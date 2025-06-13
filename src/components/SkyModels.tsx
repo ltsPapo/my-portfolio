@@ -17,8 +17,8 @@ export function SunModel() {
         <primitive
             object={scene}
             ref={ref}
-            position={[4, 1.2, 2]}
-            scale={0.005}
+            position={[2.5, 1.2, 2]}
+            scale={0.0025}
         />
     )
 }
@@ -37,7 +37,7 @@ export function MoonModel() {
         <primitive
             object={scene}
             ref={ref}
-            position={[-3.5, .4, 2.5]}
+            position={[-3.7, .2, -1]}
             scale={0.06}
         />
     )

@@ -11,8 +11,8 @@ export default function CustomModel() {
     <primitive
       object={gltf.scene}
       scale={0.0065}              // Try 0.1 to 1 depending on size
-      position={[1, -1.5, -.5]}  // Lower the model slightly
-      rotation={[0, Math.PI, 0]} // Optional: rotate to face front
+      position={[-1, -1.5, .5]}  // Lower the model slightly
+      rotation={[0, 0, 0]} // Optional: rotate to face front
     />
   )
 }

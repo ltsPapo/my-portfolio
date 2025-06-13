@@ -8,13 +8,33 @@ import BanjoWave from './banjoWave';
 import CustomModel from './CustomModel';
 import PalmTree from './palmTree';
 import { SunModel, MoonModel } from './SkyModels';
+import TropicalBackground from './TropicalBackground';
 
 
-function BackgroundColorSetter() {
-  const { gl } = useThree();
-  gl.setClearColor('#FDB99B');
-  return null;
+function CelestialCycle() {
+  const groupRef = useRef<THREE.Group>(null);
+
+  useFrame(({ clock }) => {
+    const t = clock.getElapsedTime();
+    if (groupRef.current) {
+      groupRef.current.rotation.z = t * 0.2; // adjust speed as needed
+    }
+  });
+
+  return (
+    <group ref={groupRef} position={[0, 1.5, 0]}>
+      {/* Adjust orbit radius as needed to fit in camera */}
+      <group position={[0, .7, 0]}>
+        <SunModel />
+      </group>
+      <group position={[0, -2, 0]}>
+        <MoonModel />
+      </group>
+    </group>
+  );
 }
+
+
 
 
 function ParallaxCamera() {
@@ -26,7 +46,7 @@ function ParallaxCamera() {
       const y = mouse.y * 0.3;
       cameraRef.current.position.x = x;
       cameraRef.current.position.y = 2 + y;
-      cameraRef.current.position.z = -8;
+      cameraRef.current.position.z = 8;
       cameraRef.current.lookAt(0, 0, 0);
     }
   });
@@ -35,7 +55,7 @@ function ParallaxCamera() {
     <PerspectiveCamera
       ref={cameraRef}
       makeDefault
-      position={[0, 2, -8]}
+      position={[0, 2, 8]}
       fov={30}
     />
   );
@@ -43,31 +63,18 @@ function ParallaxCamera() {
 
 export default function ThreeScene() {
   return (
-    <Canvas
-  className="w-full h-screen"
-  gl={{ alpha: false }}
-  style={{ background: '#FDB99B' }}
->
-  {/* Starry background
-      <Stars
-        radius={100}
-        depth={50}
-        count={5000}
-        factor={4}
-        saturation={0}
-        fade
-        speed={1}
-      /> */}
+    <Canvas className="w-full h-screen">
+      <ParallaxCamera />
+      <TropicalBackground />
 
-  <ParallaxCamera />
-  <BackgroundColorSetter />
-  <ambientLight intensity={0.6} />
-  <directionalLight position={[5, 5, 5]} />
-  <CustomModel />
-  <BanjoWave />
-  <SunModel />
-  <MoonModel />
-  <PalmTree />
-</Canvas>
+      {/* Lights */}
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[5, 5, 5]} />
+      
+        <CustomModel />
+        <BanjoWave />
+        <CelestialCycle />
+        <PalmTree />
+    </Canvas>
   );
 }

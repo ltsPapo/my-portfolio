@@ -17,7 +17,7 @@ export function SunModel() {
         <primitive
             object={scene}
             ref={ref}
-            position={[2.5, 1.2, 2]}
+            position={[2.5, 1.2, -.15]}
             scale={0.0025}
         />
     )

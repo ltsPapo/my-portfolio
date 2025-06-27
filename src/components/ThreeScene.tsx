@@ -69,15 +69,15 @@ function FadingStars({ cycle }: { cycle: number }) {
 
   return (
     <Stars
-      ref={starsRef}
-      radius={100}
-      depth={50}
-      count={3000}
-      factor={4}
-      saturation={0}
-      fade
-      speed={1}
-    />
+  ref={starsRef}
+  radius={100}
+  depth={50}
+  count={3000}
+  factor={4}
+  saturation={0}
+  fade
+  speed={1}
+/>
   );
 }
 
@@ -112,7 +112,7 @@ export default function ThreeScene() {
   const [cycle, setCycle] = useState(0);
 
   return (
-    <Canvas className="w-full h-screen">
+    <Canvas className="fixed inset-0 -z-10 w-full h-screen pointer-events-auto">
       <ParallaxCamera />
       <CycleController setCycle={setCycle} />
       <TropicalBackground cycle={cycle} />

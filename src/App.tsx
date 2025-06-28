@@ -5,6 +5,10 @@ import AboutPage from './components/AboutPage';
 import MorphingText from './components/MorphingText';
 import { Parallax } from 'react-scroll-parallax';
 import PageWrapper from './components/PageWrapper';
+import ProjectsPage from './components/ProjectsPage';
+import { Link } from 'react-router-dom';
+
+
 
 export default function App() {
   const location = useLocation();
@@ -13,10 +17,11 @@ export default function App() {
     <div className="relative w-screen min-h-screen text-white">
       <nav className="fixed top-0 left-0 w-full z-50 p-4 flex justify-between items-center backdrop-blur-md bg-transparent">
         <h1 className="text-2xl font-bold">
-          <a href="/">Elias Oliphant</a>
+          <Link to="/">Elias Oliphant</Link> {/* Updated from <a href="/"> */}
         </h1>
         <ul className="flex gap-4 text-sm">
-          <li><a href="/about" className="hover:underline">About</a></li>
+          <li><Link to="/about" className="hover:underline">About</Link></li>
+          <li><Link to="/projects" className="hover:underline">Projects</Link></li> {/* New */}
         </ul>
       </nav>
 
@@ -45,6 +50,14 @@ export default function App() {
             element={
               <PageWrapper>
                 <AboutPage />
+              </PageWrapper>
+            }
+          />
+          <Route
+            path="/projects"
+            element={
+              <PageWrapper>
+                <ProjectsPage />
               </PageWrapper>
             }
           />

@@ -7,6 +7,8 @@ import { Parallax } from 'react-scroll-parallax';
 import PageWrapper from './components/PageWrapper';
 import ProjectsPage from './components/ProjectsPage';
 import { Link } from 'react-router-dom';
+import CareerPage from './components/CareerPage';
+
 
 
 
@@ -21,7 +23,8 @@ export default function App() {
         </h1>
         <ul className="flex gap-4 text-sm">
           <li><Link to="/about" className="hover:underline">About</Link></li>
-          <li><Link to="/projects" className="hover:underline">Projects</Link></li> {/* New */}
+          <li><Link to="/projects" className="hover:underline">Projects</Link></li>
+          <li><Link to="/career" className="hover:underline">Career</Link></li>
         </ul>
       </nav>
 
@@ -58,6 +61,14 @@ export default function App() {
             element={
               <PageWrapper>
                 <ProjectsPage />
+              </PageWrapper>
+            }
+          />
+          <Route
+            path="/career"
+            element={
+              <PageWrapper>
+                <CareerPage />
               </PageWrapper>
             }
           />

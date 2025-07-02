@@ -8,6 +8,8 @@ import PageWrapper from './components/PageWrapper';
 import ProjectsPage from './components/ProjectsPage';
 import { Link } from 'react-router-dom';
 import CareerPage from './components/CareerPage';
+import MusicPage from './components/MusicPage';
+
 
 
 
@@ -25,6 +27,8 @@ export default function App() {
           <li><Link to="/about" className="hover:underline">About</Link></li>
           <li><Link to="/projects" className="hover:underline">Projects</Link></li>
           <li><Link to="/career" className="hover:underline">Career</Link></li>
+          <li><Link to="/music" className="text-white hover:underline">Music</Link></li>
+
         </ul>
       </nav>
 
@@ -72,7 +76,16 @@ export default function App() {
               </PageWrapper>
             }
           />
+          <Route
+            path="/music"
+            element={
+              <PageWrapper>
+                <MusicPage />
+              </PageWrapper>
+            }
+          />
         </Routes>
+        
       </AnimatePresence>
     </div>
   );

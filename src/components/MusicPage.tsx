@@ -1,117 +1,110 @@
-// src/components/MusicPage.tsx
+import React, { Suspense, useEffect, useState } from "react";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
+import { a, useSpring } from "@react-spring/three";
+import * as THREE from "three";
+import MusicBackgroundModel from "./MusicBackgroundModel";
 
-import React, { useEffect, useRef, useState } from 'react';
-import { Howl } from 'howler';
+function AnimatedCamera({
+    focus,
+    targetPosition,
+    targetLookAt,
+}: {
+    focus: boolean;
+    targetPosition: [number, number, number];
+    targetLookAt: [number, number, number];
+}) {
+    const { camera, mouse } = useThree();
+
+    const { animatedPosition } = useSpring({
+        animatedPosition: focus ? targetPosition : [0, 2, 5],
+        config: { mass: 1, tension: 170, friction: 26 },
+    });
+
+    useFrame(() => {
+        if (!focus) {
+            const base = animatedPosition.get();
+            camera.position.set(
+                base[0] + mouse.x * 0.5,
+                base[1] + mouse.y * 0.5,
+                base[2]
+            );
+            camera.lookAt(0, 1, 0); // Center room when idle
+        } else {
+            animatedPosition.get().forEach((val, i) => {
+                camera.position.setComponent(i, val);
+            });
+            camera.lookAt(new THREE.Vector3(...targetLookAt));
+        }
+    });
+
+    return null;
+}
 
 const MusicPage: React.FC = () => {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [howl, setHowl] = useState<Howl | null>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [audioCtx, setAudioCtx] = useState<AudioContext | null>(null);
-    const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
-    const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
+    const [focusOnComputer, setFocusOnComputer] = useState(false);
+    const [fadeOut, setFadeOut] = useState(false);
 
-    const audioFile = '/audio/sample.mp3'; // replace with a real file in /public/audio
+    const [targetPosition, setTargetPosition] = useState<[number, number, number]>([0, 2, 5]);
+    const [targetLookAt, setTargetLookAt] = useState<[number, number, number]>([0, 1, 0]);
 
+    // Fade-to-black after camera zoom
     useEffect(() => {
-        const sound = new Howl({
-            src: [audioFile],
-            html5: true,
-            onplay: () => setIsPlaying(true),
-            onpause: () => setIsPlaying(false),
-            onstop: () => setIsPlaying(false),
-        });
+        if (focusOnComputer) {
+            const timeout = setTimeout(() => setFadeOut(true), 800);
+            return () => clearTimeout(timeout);
+        }
+    }, [focusOnComputer]);
 
-        setHowl(sound);
+    const handleComputerMeshReady = (mesh: THREE.Mesh) => {
+    setTimeout(() => {
+        const compPos = mesh.getWorldPosition(new THREE.Vector3());
+        const compDir = new THREE.Vector3();
+        mesh.getWorldDirection(compDir); // Direction the computer is facing
 
-        return () => {
-            sound.unload();
-        };
-    }, []);
+        const cameraOffset = compDir.clone().multiplyScalar(-1.2); // Move 1.2 units in front of the monitor
+        const elevatedPos = compPos.clone().add(cameraOffset).add(new THREE.Vector3(0, 0.2, 0)); // elevate
 
-    useEffect(() => {
-        if (!howl || !isPlaying) return;
-
-        const audio = (howl as any)._sounds[0]._node as HTMLAudioElement;
-        const ctx = new AudioContext();
-        const analyserNode = ctx.createAnalyser();
-        const sourceNode = ctx.createMediaElementSource(audio);
-
-        sourceNode.connect(analyserNode);
-        analyserNode.connect(ctx.destination);
-
-        setAudioCtx(ctx);
-        setAnalyser(analyserNode);
-        sourceNodeRef.current = sourceNode;
-
-        drawVisualizer(analyserNode);
-
-        return () => {
-            analyserNode.disconnect();
-            sourceNode.disconnect();
-            ctx.close();
-        };
-    }, [howl, isPlaying]);
-
-    const drawVisualizer = (analyserNode: AnalyserNode) => {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-
-        analyserNode.fftSize = 256;
-        const bufferLength = analyserNode.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-
-        const draw = () => {
-            if (!analyserNode || !canvasRef.current) return;
-            requestAnimationFrame(draw);
-
-            analyserNode.getByteFrequencyData(dataArray);
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            const barWidth = (canvas.width / bufferLength) * 2.5;
-            let x = 0;
-
-            for (let i = 0; i < bufferLength; i++) {
-                const barHeight = dataArray[i];
-                ctx.fillStyle = 'rgba(0, 200, 255, 0.6)';
-                ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-                x += barWidth + 1;
-            }
-        };
-
-        draw();
-    };
-
+        setTargetPosition([elevatedPos.x, elevatedPos.y, elevatedPos.z]);
+        setTargetLookAt([compPos.x, compPos.y + 0.2, compPos.z]);
+    }, 100);
+};
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-6">
-            <h1 className="text-3xl font-bold mb-4">Music Player</h1>
+        <div className="relative w-full h-screen overflow-hidden">
+            <Canvas className="absolute inset-0 z-0">
+                <Suspense fallback={null}>
+                    <ambientLight intensity={1} />
+                    <directionalLight position={[5, 5, 5]} />
+                    <AnimatedCamera
+                        focus={focusOnComputer}
+                        targetPosition={targetPosition}
+                        targetLookAt={targetLookAt}
+                    />
+                    <MusicBackgroundModel
+                        onComputerClick={() => setFocusOnComputer(true)}
+                        onComputerMeshReady={handleComputerMeshReady}
+                    />
+                </Suspense>
+            </Canvas>
 
-            <canvas ref={canvasRef} width={600} height={200} className="mb-4 border rounded" />
+            {/* Fade to black transition overlay */}
+            {focusOnComputer && (
+                <div className="absolute inset-0 z-20 pointer-events-none">
+                    <div
+                        className={`w-full h-full transition-opacity duration-700 ease-in-out ${fadeOut ? "opacity-100 bg-black" : "opacity-0"
+                            }`}
+                    />
+                </div>
+            )}
 
-            <div className="flex gap-4">
-                <button
-                    className="px-4 py-2 bg-green-500 hover:bg-green-600 rounded"
-                    onClick={() => howl?.play()}
-                >
-                    Play
-                </button>
-                <button
-                    className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 rounded"
-                    onClick={() => howl?.pause()}
-                >
-                    Pause
-                </button>
-                <button
-                    className="px-4 py-2 bg-red-500 hover:bg-red-600 rounded"
-                    onClick={() => howl?.stop()}
-                >
-                    Stop
-                </button>
-            </div>
+            {/* Music player content */}
+            {fadeOut && (
+                <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+                    <div className="bg-black/70 text-white p-6 rounded-lg">
+                        <h1 className="text-2xl font-bold mb-2">Now Playing</h1>
+                        {/* Insert your visualizer + playback controls here */}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

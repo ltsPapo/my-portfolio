@@ -86,13 +86,23 @@ function FadingStars({ cycle }: { cycle: number }) {
 
 function ParallaxCamera() {
   const cameraRef = useRef<THREE.PerspectiveCamera>(null);
+  const targetX = useRef(0);
+  const targetY = useRef(0);
 
   useFrame(({ mouse }) => {
+    const smoothing = 0.05; // smaller = smoother
+
+    // Update target values
+    const x = mouse.x * 0.5;
+    const y = mouse.y * 0.3;
+
+    // Smooth interpolation
+    targetX.current += (x - targetX.current) * smoothing;
+    targetY.current += (y - targetY.current) * smoothing;
+
     if (cameraRef.current) {
-      const x = mouse.x * 0.5;
-      const y = mouse.y * 0.3;
-      cameraRef.current.position.x = x;
-      cameraRef.current.position.y = 2 + y;
+      cameraRef.current.position.x = targetX.current;
+      cameraRef.current.position.y = 2 + targetY.current;
       cameraRef.current.position.z = 8;
       cameraRef.current.lookAt(0, 0, 0);
     }

@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "dev:server": "ts-node-esm server/index.ts"
+    "dev:server": "set NODE_OPTIONS=--loader=ts-node/esm && ts-node-esm server/index.ts"
   },
   "ts-node": {
     "esm": true
@@ -24,6 +24,7 @@
     "express": "^5.1.0",
     "framer-motion": "^12.19.1",
     "howler": "^2.2.4",
+    "node-fetch": "^3.3.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",

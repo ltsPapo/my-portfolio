@@ -1,54 +1,42 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import spotifyRoutes from "./routes/spotify.js";
-import { getSpotifyAccessToken } from "./utils/spotifyAuth.js";
-
-// Load env variables
-dotenv.config();
-
-// Try fetching the Spotify token on startup for debugging
-// getSpotifyAccessToken()
-//   .then((token) => {
-//     console.log("🎧 Token fetched successfully in index.ts:");
-//     console.log("ACCESS_TOKEN:", token);
-//   })
-//   .catch((err) => {
-//     console.error("🔥 Token call failed in index.ts:");
-//     if (err instanceof Error) {
-//       console.error("Message:", err.message);
-//     } else {
-//       console.error("Unknown error:", err);
-//     }
-//     console.dir(err, { depth: null });
-//   });
-
-// Global error fallback
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("🛑 Unhandled Promise Rejection:");
-  console.dir(reason, { depth: null });
-});
+import 'dotenv/config';
+import express, { type NextFunction, type Request, type Response } from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import spotifyRouter from './routes/spotify.js';
 
 const app = express();
-app.use(cors());
+const { NODE_ENV = 'development', PORT = '3001', ORIGIN = 'http://127.0.0.1:5173',
+  SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REDIRECT_URI } = process.env;
+
+function requireEnv(name: string, val?: string) { if (!val) throw new Error(`Missing env: ${name}`); return val; }
+
+process.on('unhandledRejection', (r) => console.error('UnhandledRejection', r));
+process.on('uncaughtException', (e) => console.error('UncaughtException', e));
+
+app.use(cookieParser());
 app.use(express.json());
+app.use(cors({ origin: ORIGIN, credentials: true }));
 
-// Mount Spotify API routes
-app.use("/api/spotify", spotifyRoutes);
+app.get('/healthz', (_req: Request, res: Response) => res.json({ ok: true }));
+app.get('/api/diagnostics', (_req, res) => res.json({
+  nodeEnv: NODE_ENV,
+  origin: ORIGIN,
+  redirectUri: SPOTIFY_REDIRECT_URI,
+  hasClientId: !!SPOTIFY_CLIENT_ID,
+  hasClientSecret: !!SPOTIFY_CLIENT_SECRET,
+}));
 
-// Handle Spotify OAuth callback
-app.get("/api/callback", (req, res) => {
-  const code = req.query.code;
-  if (!code) {
-    res.status(400).send("Missing authorization code.");
-    return;
-  }
+app.use('/api/spotify', spotifyRouter);
 
-  console.log("🟢 Received authorization code:", code);
-  res.send("✅ Authorization code received! You can now exchange it for a token.");
+// error middleware
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error('❗ API Error:', err?.message || err);
+  res.status(typeof err?.status === 'number' ? err.status : 500).json({ error: { message: err?.message || 'Internal Server Error' } });
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+(async () => {
+  requireEnv('SPOTIFY_CLIENT_ID', SPOTIFY_CLIENT_ID);
+  requireEnv('SPOTIFY_CLIENT_SECRET', SPOTIFY_CLIENT_SECRET);
+  requireEnv('SPOTIFY_REDIRECT_URI', SPOTIFY_REDIRECT_URI);
+  app.listen(Number(PORT), () => console.log(`⚡ Express listening on http://127.0.0.1:${PORT}`));
+})();

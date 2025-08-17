@@ -10,7 +10,7 @@ const app = express();
 
 const {
   NODE_ENV = 'development',
-  PORT = process.env.PORT || '3001', // Render sets PORT
+  PORT = process.env.PORT || '3001',
   ORIGIN = 'http://127.0.0.1:5173',
   SPOTIFY_CLIENT_ID,
   SPOTIFY_CLIENT_SECRET,
@@ -31,31 +31,28 @@ app.use(cors({ origin: ORIGIN, credentials: true }));
 
 app.get('/healthz', (_req: Request, res: Response) => res.json({ ok: true }));
 
-// API routes first (no static interference)
 app.use('/api/spotify', spotifyRouter);
 
-// ---- Serve Vite build from Express (single domain) ----
+// Serve Vite build (single domain)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DIST = path.resolve(__dirname, '..', 'dist');
-
 app.use(express.static(DIST));
-
-// SPA fallback (exclude /api/*)
 app.get('*', (req, res) => {
   if (req.path.startsWith('/api/')) return res.status(404).end();
   res.sendFile(path.join(DIST, 'index.html'));
 });
 
-// Error middleware
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  console.error('❗ API Error:', err?.message || err);
-  res.status(typeof err?.status === 'number' ? err.status : 500).json({
-    error: { message: err?.message || 'Internal Server Error' },
-  });
+// Error middleware (typed)
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  // Use _next to satisfy no-unused-vars
+  void _next;
+  const status = 500;
+  const message = err instanceof Error ? err.message : String(err);
+  console.error('❗ API Error:', message);
+  res.status(status).json({ error: { message } });
 });
 
-// Start
 (async () => {
   requireEnv('SPOTIFY_CLIENT_ID', SPOTIFY_CLIENT_ID);
   requireEnv('SPOTIFY_CLIENT_SECRET', SPOTIFY_CLIENT_SECRET);

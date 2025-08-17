@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { a, useSpring } from '@react-spring/three';
 import * as THREE from 'three';
@@ -25,7 +25,6 @@ function AnimatedCamera({
 
   useFrame(() => {
     const base = animatedPosition.get();
-
     if (!focus) {
       const smoothing = 0.05;
       const targetX = mouse.x * 0.5;
@@ -73,7 +72,6 @@ const MusicPage: React.FC = () => {
   const [targetPosition, setTargetPosition] = useState<[number, number, number]>([0, 2, 5]);
   const [targetLookAt, setTargetLookAt] = useState<[number, number, number]>([0, 1, 0]);
 
-  // Spotify UI state
   const [me, setMe] = useState<Me | null>(null);
   const [now, setNow] = useState<Now>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -82,8 +80,7 @@ const MusicPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const authed = useMemo(() => err !== 'UNAUTHORIZED', [err]);
 
-  // Load Spotify only after fade-out completes
-  async function loadAll(selectedRange = range) {
+  const loadAll = useCallback(async (selectedRange = range) => {
     setLoading(true);
     setErr(null);
     try {
@@ -106,7 +103,7 @@ const MusicPage: React.FC = () => {
                 ? {
                     name: n.item.name,
                     url: n.item.external_urls?.spotify,
-                    artists: (n.item.artists ?? []).map((a: any) => a.name),
+                    artists: (n.item.artists ?? []).map((a: { name: string }) => a.name),
                     album: n.item.album?.name,
                     albumImageUrl: n.item.album?.images?.[0]?.url ?? null,
                   }
@@ -120,31 +117,34 @@ const MusicPage: React.FC = () => {
           id: x.id,
           name: x.name,
           url: x.url ?? x.external_urls?.spotify,
-          artists: x.artists?.map((a: any) => a.name) ?? x.artists ?? [],
+          artists: (x.artists ?? []).map((a: { name: string }) => a.name),
           albumImageUrl: x.albumImageUrl ?? x.album?.images?.[0]?.url ?? null,
         })),
       );
-    } catch (e: any) {
-      if (String(e?.message) === '401') setErr('UNAUTHORIZED');
-      else setErr(e?.message ?? 'error');
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (msg === '401') setErr('UNAUTHORIZED');
+      else setErr(msg);
     } finally {
       setLoading(false);
     }
-  }
+  }, [range]);
 
-useEffect(() => {
-  if (focusOnComputer) {
-    const t = setTimeout(() => setFadeOut(true), 800); // wait for zoom, then fade
-    return () => clearTimeout(t);
-  } else {
-    setFadeOut(false); // ensures we can re-enter the sequence
-  }
-}, [focusOnComputer]);
+  // Fade trigger (keep)
+  useEffect(() => {
+    if (focusOnComputer) {
+      const t = setTimeout(() => setFadeOut(true), 800);
+      return () => clearTimeout(t);
+    }
+    setFadeOut(false);
+  }, [focusOnComputer]);
 
+  // Load when overlay shown
   useEffect(() => {
     if (fadeOut) loadAll();
-  }, [fadeOut]);
+  }, [fadeOut, loadAll]);
 
+  // Poll now-playing while overlay visible
   useEffect(() => {
     if (!fadeOut) return;
     const i = setInterval(async () => {
@@ -162,7 +162,7 @@ useEffect(() => {
                   ? {
                       name: n.item.name,
                       url: n.item.external_urls?.spotify,
-                      artists: (n.item.artists ?? []).map((a: any) => a.name),
+                      artists: (n.item.artists ?? []).map((a: { name: string }) => a.name),
                       album: n.item.album?.name,
                       albumImageUrl: n.item.album?.images?.[0]?.url ?? null,
                     }
@@ -170,11 +170,14 @@ useEffect(() => {
               }
             : null,
         );
-      } catch {}
+      } catch {
+        /* ignore */
+      }
     }, 15000);
     return () => clearInterval(i);
   }, [fadeOut]);
 
+  // Update top tracks when range changes and overlay visible
   useEffect(() => {
     if (!fadeOut) return;
     (async () => {
@@ -186,11 +189,13 @@ useEffect(() => {
             id: x.id,
             name: x.name,
             url: x.url ?? x.external_urls?.spotify,
-            artists: x.artists?.map((a: any) => a.name) ?? x.artists ?? [],
+            artists: (x.artists ?? []).map((a: { name: string }) => a.name),
             albumImageUrl: x.albumImageUrl ?? x.album?.images?.[0]?.url ?? null,
           })),
         );
-      } catch {}
+      } catch {
+        /* ignore */
+      }
     })();
   }, [range, fadeOut]);
 
@@ -227,7 +232,6 @@ useEffect(() => {
       {fadeOut && (
         <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
           <div className="bg-black/70 text-white p-6 rounded-lg max-w-3xl w-[92%] pointer-events-auto">
-            {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 {me?.image && <img src={me.image} alt="pfp" className="h-10 w-10 rounded-full object-cover" />}
@@ -240,18 +244,12 @@ useEffect(() => {
                 <form action="/api/spotify/logout" method="post">
                   <button className="px-3 py-1 border rounded-md text-xs">Disconnect</button>
                 </form>
-                <a
-                  href={me?.external_url ?? 'https://open.spotify.com/'}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3 py-1 border rounded-md text-xs"
-                >
+                <a href={me?.external_url ?? 'https://open.spotify.com/'} target="_blank" rel="noreferrer" className="px-3 py-1 border rounded-md text-xs">
                   Open on Spotify
                 </a>
               </div>
             </div>
 
-            {/* Connect state */}
             {!authed ? (
               <div className="text-center py-10">
                 <h3 className="text-xl font-bold mb-2">Connect your Spotify</h3>
@@ -260,7 +258,6 @@ useEffect(() => {
               </div>
             ) : (
               <>
-                {/* Grid: Now Playing + Range */}
                 <div className="grid gap-4 md:grid-cols-3 mb-4">
                   <div className="md:col-span-2 border border-white/15 rounded-xl p-4">
                     <h3 className="font-medium mb-3">Now Playing</h3>
@@ -268,9 +265,7 @@ useEffect(() => {
                       <div className="h-24 rounded-lg border border-white/10 animate-pulse" />
                     ) : now?.isPlaying && now?.track ? (
                       <div className="flex gap-4">
-                        {now.track.albumImageUrl && (
-                          <img src={now.track.albumImageUrl} alt="album" className="h-20 w-20 rounded-lg object-cover" />
-                        )}
+                        {now.track.albumImageUrl && <img src={now.track.albumImageUrl} alt="album" className="h-20 w-20 rounded-lg object-cover" />}
                         <div className="flex-1">
                           <a href={now.track.url} target="_blank" rel="noreferrer" className="text-base font-semibold hover:underline">
                             {now.track.name}
@@ -291,11 +286,7 @@ useEffect(() => {
                     <h3 className="font-medium mb-3">Time Range</h3>
                     <div className="flex flex-wrap gap-2">
                       {ranges.map((r) => (
-                        <button
-                          key={r.key}
-                          onClick={() => setRange(r.key)}
-                          className={`px-3 py-1.5 rounded-lg border text-xs ${range === r.key ? 'opacity-100' : 'opacity-70'}`}
-                        >
+                        <button key={r.key} onClick={() => setRange(r.key)} className={`px-3 py-1.5 rounded-lg border text-xs ${range === r.key ? 'opacity-100' : 'opacity-70'}`}>
                           {r.label}
                         </button>
                       ))}
@@ -303,7 +294,6 @@ useEffect(() => {
                   </div>
                 </div>
 
-                {/* Top Tracks */}
                 <div className="border border-white/15 rounded-xl p-4">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-medium">Top Tracks</h3>
@@ -317,7 +307,6 @@ useEffect(() => {
                           <a href={t.url} target="_blank" rel="noreferrer" className="font-medium truncate hover:underline">
                             {i + 1}. {t.name}
                           </a>
-                          {/* artists truncated on purpose */}
                         </div>
                         <a href={t.url} target="_blank" rel="noreferrer" className="px-2 py-1 rounded-md border text-xs">Play</a>
                       </li>

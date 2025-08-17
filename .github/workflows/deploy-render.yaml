@@ -1,3 +1,4 @@
+# FILE: .github/workflows/deploy-render.yml
 name: CI & Deploy (Render)
 
 on:
@@ -21,7 +22,13 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      # Use npm install (not npm ci) to avoid rollup native optional-deps issue on Linux
+      # 1) Regenerate lockfile for Linux (does NOT commit it)
+      - name: Prepare Linux lockfile
+        run: |
+          rm -f package-lock.json
+          npm install --package-lock-only --no-audit --no-fund
+
+      # 2) Install (not npm ci)
       - name: Install
         run: npm install --no-audit --no-fund
 
@@ -34,7 +41,10 @@ jobs:
       - name: Typecheck (server)
         run: npx tsc -p tsconfig.node.json --noEmit
 
+      # 3) Build with native disabled to avoid optional-deps edge cases
       - name: Build
+        env:
+          ROLLUP_SKIP_NODE_NATIVE: '1'
         run: npm run build
 
   deploy:

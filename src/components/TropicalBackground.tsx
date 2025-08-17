@@ -1,31 +1,30 @@
 import * as THREE from 'three';
-import { extend, useFrame } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import { shaderMaterial } from '@react-three/drei';
-import { useRef } from 'react';
+import { useMemo } from 'react';
 
 type TropicalBackgroundProps = {
   cycle: number;
 };
 
-
-// Define shader material
+// Define shader material class (uniform defaults)
 const TropicalMaterial = shaderMaterial(
   {
     uTime: 0,
     uCycle: 0,
-    uColor1Day: new THREE.Color('#EFB3FF'), // pink-lavender
-    uColor2Day: new THREE.Color('#FFDDE1'), // soft pink
-    uColor1Night: new THREE.Color('#355C7D'), // cool blue
-    uColor2Night: new THREE.Color('#6C5B7B'), // dusk purple
+    uColor1Day: new THREE.Color('#EFB3FF'),
+    uColor2Day: new THREE.Color('#FFDDE1'),
+    uColor1Night: new THREE.Color('#355C7D'),
+    uColor2Night: new THREE.Color('#6C5B7B'),
   },
-  `
+  /* glsl */ `
     varying vec2 vUv;
     void main() {
       vUv = uv;
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     }
   `,
-  `
+  /* glsl */ `
     uniform float uTime;
     uniform float uCycle;
     uniform vec3 uColor1Day;
@@ -47,30 +46,34 @@ const TropicalMaterial = shaderMaterial(
   `
 );
 
-// Register material with R3F
-extend({ TropicalMaterial });
-
-// Extend JSX for TypeScript
-declare module '@react-three/fiber' {
-  interface ThreeElements {
-    tropicalMaterial: any;
-  }
-}
+// Typed instance so uniforms are accessible
+type TropicalInstance = InstanceType<typeof TropicalMaterial> & {
+  uTime: number;
+  uCycle: number;
+  uColor1Day: THREE.Color;
+  uColor2Day: THREE.Color;
+  uColor1Night: THREE.Color;
+  uColor2Night: THREE.Color;
+};
 
 export default function TropicalBackground({ cycle }: TropicalBackgroundProps) {
-  const ref = useRef<any>(null);
+  // Create a single material instance (no JSX augmentation required)
+  const material = useMemo<TropicalInstance>(
+    () => new (TropicalMaterial as unknown as new () => TropicalInstance)(),
+    []
+  );
 
+  // Drive uniforms per frame
   useFrame(({ clock }) => {
-    if (ref.current) {
-      ref.current.uTime = clock.getElapsedTime();
-      ref.current.uCycle = cycle;
-    }
+    material.uTime = clock.getElapsedTime();
+    material.uCycle = cycle;
   });
 
   return (
     <mesh position={[0, 0, -50]} scale={[200, 200, 1]}>
       <planeGeometry args={[1, 1]} />
-      <tropicalMaterial ref={ref} />
+      {/* Mount the shader as the mesh material */}
+      <primitive attach="material" object={material} />
     </mesh>
   );
 }

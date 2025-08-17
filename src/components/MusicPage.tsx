@@ -56,13 +56,7 @@ type ApiTrack = {
   album?: ApiAlbum;
 };
 type ApiTopTracks = { items: ApiTrack[] };
-type ApiCurrentlyPlaying =
-  | {
-      is_playing: boolean;
-      progress_ms: number | null;
-      item: ApiTrack | null;
-    }
-  | null;
+
 
 type Me = { display_name: string; followers?: number; image?: string | null; external_url?: string };
 type Now = {

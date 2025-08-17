@@ -1,9 +1,7 @@
 import { Canvas, useFrame } from '@react-three/fiber';
-import { useThree } from '@react-three/fiber';
 import { PerspectiveCamera, Stars } from '@react-three/drei';
 import { useRef, useState } from 'react';
 import * as THREE from 'three';
-
 import BanjoWave from './banjoWave';
 import CustomModel from './CustomModel';
 import PalmTree from './palmTree';

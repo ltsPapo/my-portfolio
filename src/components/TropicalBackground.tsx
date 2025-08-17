@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { extend, useThree, useFrame } from '@react-three/fiber';
+import { extend, useFrame } from '@react-three/fiber';
 import { shaderMaterial } from '@react-three/drei';
 import { useRef } from 'react';
 
@@ -59,7 +59,6 @@ declare module '@react-three/fiber' {
 
 export default function TropicalBackground({ cycle }: TropicalBackgroundProps) {
   const ref = useRef<any>(null);
-  const { viewport } = useThree();
 
   useFrame(({ clock }) => {
     if (ref.current) {

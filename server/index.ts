@@ -1,6 +1,7 @@
+// server/index.ts  (drop-in replacement for the route bits; rest unchanged)
 import 'dotenv/config';
-import express, { type NextFunction, type Request, type Response } from 'express';
-import cors from 'cors';
+import express, { type RequestHandler, type NextFunction, type Request, type Response } from 'express';
+import cors, { type CorsOptions } from 'cors';
 import cookieParser from 'cookie-parser';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -27,30 +28,40 @@ process.on('uncaughtException', (e) => console.error('UncaughtException', e));
 
 app.use(cookieParser());
 app.use(express.json());
-app.use(cors({ origin: ORIGIN, credentials: true }));
 
-app.get('/healthz', (_req: Request, res: Response) => res.json({ ok: true }));
+const corsOptions: CorsOptions = { origin: ORIGIN, credentials: true };
+app.use(cors(corsOptions));
+
+// ✅ Type handlers as RequestHandler (avoid overload picking)
+const healthz: RequestHandler = (_req, res) => {
+  res.json({ ok: true });
+};
+app.get('/healthz', healthz);
 
 app.use('/api/spotify', spotifyRouter);
 
-// Serve Vite build (single domain)
+// Static + SPA fallback
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DIST = path.resolve(__dirname, '..', 'dist');
-app.use(express.static(DIST));
-app.get('*', (req, res) => {
-  if (req.path.startsWith('/api/')) return res.status(404).end();
-  res.sendFile(path.join(DIST, 'index.html'));
-});
 
-// Error middleware (typed)
+app.use(express.static(DIST));
+
+const spaFallback: RequestHandler = (req, res) => {
+  if (req.path.startsWith('/api/')) {
+    res.status(404).end();
+    return;
+  }
+  res.sendFile(path.join(DIST, 'index.html'));
+};
+app.get('*', spaFallback);
+
+// Error middleware
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
-  // Use _next to satisfy no-unused-vars
-  void _next;
-  const status = 500;
+  void _next; // intentional
   const message = err instanceof Error ? err.message : String(err);
   console.error('❗ API Error:', message);
-  res.status(status).json({ error: { message } });
+  res.status(500).json({ error: { message } });
 });
 
 (async () => {

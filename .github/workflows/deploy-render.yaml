@@ -1,4 +1,3 @@
-# FILE: .github/workflows/deploy-render.yml
 name: CI & Deploy (Render)
 
 on:
@@ -12,42 +11,29 @@ concurrency:
 
 jobs:
   ci:
-    name: Build & Test
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-
       - name: Install
         run: npm ci
-
       - name: Lint
         run: npm run lint --if-present
-
-      - name: Typecheck
-        run: npx tsc -p tsconfig.json --noEmit || npx tsc -p tsconfig.app.json --noEmit || true
-
+      - name: Typecheck (app)
+        run: npx tsc -p tsconfig.app.json --noEmit
+      - name: Typecheck (server)
+        run: npx tsc -p tsconfig.node.json --noEmit
       - name: Build
         run: npm run build
 
   deploy:
-    name: Trigger Render Deploy
     needs: ci
     runs-on: ubuntu-latest
-    if: ${{ needs.ci.result == 'success' }}
     env:
       RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
     steps:
-      - name: Validate secret present
-        run: |
-          if [ -z "${RENDER_DEPLOY_HOOK_URL}" ]; then
-            echo "Missing RENDER_DEPLOY_HOOK_URL secret"; exit 1
-          fi
-      - name: Trigger deploy
+      - name: Trigger Render Deploy
         run: curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_URL"

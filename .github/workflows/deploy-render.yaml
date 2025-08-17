@@ -12,28 +12,42 @@ concurrency:
 jobs:
   ci:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
+
+      # Use npm install (not npm ci) to avoid rollup native optional-deps issue on Linux
       - name: Install
-        run: npm ci
+        run: npm install --no-audit --no-fund
+
       - name: Lint
         run: npm run lint --if-present
+
       - name: Typecheck (app)
         run: npx tsc -p tsconfig.app.json --noEmit
+
       - name: Typecheck (server)
         run: npx tsc -p tsconfig.node.json --noEmit
+
       - name: Build
         run: npm run build
 
   deploy:
+    name: Trigger Render Deploy
     needs: ci
     runs-on: ubuntu-latest
     env:
       RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
     steps:
+      - name: Validate Deploy Hook secret
+        run: |
+          if [ -z "${RENDER_DEPLOY_HOOK_URL}" ]; then
+            echo "Missing RENDER_DEPLOY_HOOK_URL"; exit 1
+          fi
       - name: Trigger Render Deploy
         run: curl -fsSL -X POST "$RENDER_DEPLOY_HOOK_URL"

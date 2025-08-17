@@ -1,5 +1,4 @@
 import type { FC } from 'react';
-import { SiTypescript, SiNextdotjs, SiMongodb } from 'react-icons/si';
 import * as React from 'react';
 
 

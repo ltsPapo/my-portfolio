@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import Reacrt from 'react';
 import profileImg from '../assets/Portfolio_Grad.jpg'
 import fightImg from '../assets/Portfolio_Fighting.jpg'
 import SkillsSection from './SkillsSection';
@@ -7,14 +6,14 @@ import { FaGithub, FaLinkedin } from 'react-icons/fa';
 import { HiOutlineDocumentText } from 'react-icons/hi';
 
 
-const fadeInUp = {
-    hidden: { opacity: 0, y: 40 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.6, ease: 'easeOut' },
-    },
-};
+// const fadeInUp = {
+//     hidden: { opacity: 0, y: 40 },
+//     visible: {
+//         opacity: 1,
+//         y: 0,
+//         transition: { duration: 0.6, ease: 'easeOut' },
+//     },
+// };
 
 export default function AboutPage() {
     return (

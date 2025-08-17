@@ -1,6 +1,6 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
-import { a, useSpring } from '@react-spring/three';
+import { useSpring } from '@react-spring/three';
 import * as THREE from 'three';
 import MusicBackgroundModel from './MusicBackgroundModel';
 import { getMe, getNowPlaying, getTopTracks } from '../api/spotify';
@@ -42,6 +42,28 @@ function AnimatedCamera({
   return null;
 }
 
+// ---- Typed Spotify shapes (minimal fields used) ----
+type ApiImage = { url: string };
+type ApiExternalUrls = { spotify?: string };
+type ApiArtist = { name: string };
+type ApiAlbum = { name?: string; images?: ApiImage[] };
+type ApiTrack = {
+  id: string;
+  name: string;
+  duration_ms?: number;
+  external_urls?: ApiExternalUrls;
+  artists?: ApiArtist[];
+  album?: ApiAlbum;
+};
+type ApiTopTracks = { items: ApiTrack[] };
+type ApiCurrentlyPlaying =
+  | {
+      is_playing: boolean;
+      progress_ms: number | null;
+      item: ApiTrack | null;
+    }
+  | null;
+
 type Me = { display_name: string; followers?: number; image?: string | null; external_url?: string };
 type Now = {
   isPlaying: boolean;
@@ -63,6 +85,16 @@ function Progress({ value }: { value: number }) {
       <div className="h-2 rounded-full bg-white/80" style={{ width: `${Math.max(0, Math.min(100, value))}%` }} />
     </div>
   );
+}
+
+function mapApiTrack(x: ApiTrack): Track {
+  return {
+    id: x.id,
+    name: x.name,
+    url: x.external_urls?.spotify ?? '',
+    artists: (x.artists ?? []).map((a) => a.name),
+    albumImageUrl: x.album?.images?.[0]?.url ?? null,
+  };
 }
 
 const MusicPage: React.FC = () => {
@@ -91,36 +123,37 @@ const MusicPage: React.FC = () => {
         image: m.image,
         external_url: m.external_url,
       });
-      setNow(
-        n
+
+      // map currently-playing
+      const mappedNow: Now =
+        n && (n.isPlaying ?? n.is_playing)
           ? {
               isPlaying: n.isPlaying ?? n.is_playing,
               progressMs: n.progressMs ?? n.progress_ms ?? null,
-              durationMs: n.durationMs ?? n.item?.duration_ms ?? null,
-              track: n.track
-                ? n.track
-                : n.item
-                ? {
-                    name: n.item.name,
-                    url: n.item.external_urls?.spotify,
-                    artists: (n.item.artists ?? []).map((a: { name: string }) => a.name),
-                    album: n.item.album?.name,
-                    albumImageUrl: n.item.album?.images?.[0]?.url ?? null,
-                  }
-                : null,
+              durationMs:
+                n.durationMs ??
+                (n.item && typeof n.item.duration_ms === 'number' ? n.item.duration_ms : null),
+              track:
+                n.track ??
+                (n.item
+                  ? {
+                      name: n.item.name,
+                      url: n.item.external_urls?.spotify ?? '',
+                      artists: (n.item.artists ?? []).map((a: ApiArtist) => a.name),
+                      album: n.item.album?.name ?? '',
+                      albumImageUrl: n.item.album?.images?.[0]?.url ?? null,
+                    }
+                  : null),
             }
-          : null,
-      );
-      const items = t.tracks ?? t.items ?? [];
-      setTracks(
-        items.map((x: any) => ({
-          id: x.id,
-          name: x.name,
-          url: x.url ?? x.external_urls?.spotify,
-          artists: (x.artists ?? []).map((a: { name: string }) => a.name),
-          albumImageUrl: x.albumImageUrl ?? x.album?.images?.[0]?.url ?? null,
-        })),
-      );
+          : n
+          ? { isPlaying: false }
+          : null;
+      setNow(mappedNow);
+
+      // map top-tracks
+      const items: ApiTrack[] =
+        Array.isArray(t?.tracks) ? (t.tracks as ApiTrack[]) : ((t?.items ?? []) as ApiTrack[]);
+      setTracks(items.map(mapApiTrack));
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       if (msg === '401') setErr('UNAUTHORIZED');
@@ -130,7 +163,7 @@ const MusicPage: React.FC = () => {
     }
   }, [range]);
 
-  // Fade trigger (keep)
+  // Fade trigger
   useEffect(() => {
     if (focusOnComputer) {
       const t = setTimeout(() => setFadeOut(true), 800);
@@ -150,26 +183,30 @@ const MusicPage: React.FC = () => {
     const i = setInterval(async () => {
       try {
         const n = await getNowPlaying();
-        setNow(
-          n
+        const mapped: Now =
+          n && (n.isPlaying ?? n.is_playing)
             ? {
                 isPlaying: n.isPlaying ?? n.is_playing,
                 progressMs: n.progressMs ?? n.progress_ms ?? null,
-                durationMs: n.durationMs ?? n.item?.duration_ms ?? null,
-                track: n.track
-                  ? n.track
-                  : n.item
-                  ? {
-                      name: n.item.name,
-                      url: n.item.external_urls?.spotify,
-                      artists: (n.item.artists ?? []).map((a: { name: string }) => a.name),
-                      album: n.item.album?.name,
-                      albumImageUrl: n.item.album?.images?.[0]?.url ?? null,
-                    }
-                  : null,
+                durationMs:
+                  n.durationMs ??
+                  (n.item && typeof n.item.duration_ms === 'number' ? n.item.duration_ms : null),
+                track:
+                  n.track ??
+                  (n.item
+                    ? {
+                        name: n.item.name,
+                        url: n.item.external_urls?.spotify ?? '',
+                        artists: (n.item.artists ?? []).map((a: ApiArtist) => a.name),
+                        album: n.item.album?.name ?? '',
+                        albumImageUrl: n.item.album?.images?.[0]?.url ?? null,
+                      }
+                    : null),
               }
-            : null,
-        );
+            : n
+            ? { isPlaying: false }
+            : null;
+        setNow(mapped);
       } catch {
         /* ignore */
       }
@@ -182,17 +219,10 @@ const MusicPage: React.FC = () => {
     if (!fadeOut) return;
     (async () => {
       try {
-        const t = await getTopTracks(range);
-        const items = t.tracks ?? t.items ?? [];
-        setTracks(
-          items.map((x: any) => ({
-            id: x.id,
-            name: x.name,
-            url: x.url ?? x.external_urls?.spotify,
-            artists: (x.artists ?? []).map((a: { name: string }) => a.name),
-            albumImageUrl: x.albumImageUrl ?? x.album?.images?.[0]?.url ?? null,
-          })),
-        );
+        const t: ApiTopTracks | { tracks: ApiTrack[] } = await getTopTracks(range);
+        const items: ApiTrack[] =
+          'tracks' in t ? (t.tracks as ApiTrack[]) : ((t.items ?? []) as ApiTrack[]);
+        setTracks(items.map(mapApiTrack));
       } catch {
         /* ignore */
       }

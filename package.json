@@ -5,7 +5,7 @@
   "engines": { "node": "20.x" },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "tsc -b && vite build",
+    "build": "tsc -p tsconfig.node.json && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
     "dev:server": "cross-env NODE_ENV=development tsx watch server/index.ts",

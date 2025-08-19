@@ -1,5 +1,6 @@
 {
    "name": "my-portfolio",
+  "private": true,
   "version": "0.0.0",
   "type": "module",
   "engines": { "node": "20.x" },
@@ -9,7 +10,8 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "dev:server": "cross-env NODE_ENV=development tsx watch server/index.ts",
-    "start": "cross-env NODE_ENV=production node dist/server/index.js"
+    "start": "cross-env NODE_ENV=production node dist/server/index.js",
+    "start:ts": "cross-env NODE_ENV=production tsx server/index.ts"
   },
   "ts-node": {
     "esm": true

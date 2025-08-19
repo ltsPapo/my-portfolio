@@ -3,11 +3,12 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "outDir": "dist/server",
     "lib": ["ES2022"],
     "types": ["node"],
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": true,
+    "noEmit": false,
     "resolveJsonModule": true
   },
   "include": ["server/**/*.ts"]

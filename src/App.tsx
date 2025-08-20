@@ -9,6 +9,8 @@ import ProjectsPage from './components/ProjectsPage';
 import { Link } from 'react-router-dom';
 import CareerPage from './components/CareerPage';
 import MusicPage from './components/MusicPage';
+import { motion } from 'framer-motion';
+
 
 
 
@@ -23,13 +25,26 @@ export default function App() {
         <h1 className="text-2xl font-bold">
           <Link to="/">Elias Oliphant</Link> {/* Updated from <a href="/"> */}
         </h1>
-        <ul className="flex gap-4 text-sm">
-          <li><Link to="/about" className="hover:underline">About</Link></li>
-          <li><Link to="/projects" className="hover:underline">Projects</Link></li>
-          <li><Link to="/career" className="hover:underline">Career</Link></li>
-          <li><Link to="/music" className="text-white hover:underline">Music</Link></li>
-
-        </ul>
+        <ul className="flex gap-6 text-sm">
+  {[
+    { to: '/about', label: 'About' },
+    { to: '/projects', label: 'Projects' },
+    { to: '/career', label: 'Career' },
+    { to: '/music', label: 'Music' },
+  ].map(({ to, label }) => (
+    <motion.li
+      key={to}
+      whileHover={{ scale: 1.1 }}
+      transition={{ type: 'spring', stiffness: 300 }}
+      className="relative group"
+    >
+      <Link to={to} className="text-white">
+        {label}
+        <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-blue-400 transition-all duration-300 group-hover:w-full"></span>
+      </Link>
+    </motion.li>
+  ))}
+</ul>
       </nav>
 
       <AnimatePresence mode="wait">

@@ -1,36 +1,26 @@
 import { motion } from 'framer-motion';
-import profileImg from '../assets/Portfolio_Grad.jpg'
-import fightImg from '../assets/Portfolio_Fighting.jpg'
+import profileImg from '../assets/Portfolio_Grad.jpg';
+import fightImg from '../assets/Portfolio_Fighting.jpg';
 import SkillsSection from './SkillsSection';
 import { FaGithub, FaLinkedin } from 'react-icons/fa';
 import { HiOutlineDocumentText } from 'react-icons/hi';
 
-
-// const fadeInUp = {
-//     hidden: { opacity: 0, y: 40 },
-//     visible: {
-//         opacity: 1,
-//         y: 0,
-//         transition: { duration: 0.6, ease: 'easeOut' },
-//     },
-// };
-
 export default function AboutPage() {
     return (
-        <main className="min-h-screen bg-white text-black px-6 pt-24">
+        <main className="min-h-screen bg-gray-900 text-gray-100 font-poppins px-6 pt-24">
             <motion.img
                 src={profileImg}
                 alt="Elias Oliphant"
-                className="w-full max-w-lg mx-auto rounded-lg shadow-xl"
-                initial={{ opacity: 0, scale: 0.8 }}
+                className="w-full max-w-lg mx-auto rounded-xl shadow-lg hover:shadow-blue-500/20 transition-shadow duration-300"
+                initial={{ opacity: 0, scale: 0.85 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6 }}
                 viewport={{ once: true }}
             />
 
-            <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
+            <div className="flex flex-col items-center text-center max-w-3xl mx-auto mt-10">
                 <motion.h1
-                    className="text-4xl font-bold mb-4"
+                    className="text-5xl font-extrabold mb-5 text-blue-400"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, amount: 0.5 }}
@@ -43,7 +33,7 @@ export default function AboutPage() {
                 </motion.h1>
 
                 <motion.p
-                    className="text-lg leading-relaxed"
+                    className="text-lg leading-relaxed text-gray-300"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, amount: 0.5 }}
@@ -59,20 +49,19 @@ export default function AboutPage() {
 
             <SkillsSection />
 
-
             <motion.img
                 src={fightImg}
                 alt="Elias training"
-                className="w-full max-w-2xl rounded-lg mt-10 shadow-xl mx-auto"
+                className="w-full max-w-2xl rounded-xl mt-16 shadow-xl hover:shadow-red-400/30 transition-shadow duration-300 mx-auto"
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: 'easeOut' }}
                 viewport={{ once: true, amount: 0.5 }}
             />
 
-            <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
+            <div className="flex flex-col items-center text-center max-w-3xl mx-auto mt-10">
                 <motion.h1
-                    className="text-4xl font-bold mb-4"
+                    className="text-4xl font-bold mb-4 text-red-400"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, amount: 0.5 }}
@@ -85,7 +74,7 @@ export default function AboutPage() {
                 </motion.h1>
 
                 <motion.p
-                    className="text-lg leading-relaxed"
+                    className="text-lg leading-relaxed text-gray-300"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, amount: 0.5 }}
@@ -99,15 +88,15 @@ export default function AboutPage() {
             </div>
 
             <section className="mt-20 w-full flex flex-col items-center px-6">
-                <h2 className="text-2xl font-bold mb-6">Links</h2>
+                <h2 className="text-2xl font-bold mb-6 text-gray-100">Links</h2>
 
                 <div className="flex flex-wrap justify-center gap-6">
                     <motion.a
                         href="https://github.com/ltsPapo"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-5 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition"
-                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center gap-2 px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition transform hover:scale-105"
+                        whileHover={{ scale: 1.08 }}
                     >
                         <FaGithub className="text-xl" />
                         GitHub
@@ -117,8 +106,8 @@ export default function AboutPage() {
                         href="https://www.linkedin.com/in/eliasolip"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center gap-2 px-6 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-600 transition transform hover:scale-105"
+                        whileHover={{ scale: 1.08 }}
                     >
                         <FaLinkedin className="text-xl" />
                         LinkedIn
@@ -128,8 +117,8 @@ export default function AboutPage() {
                         href="/Oliphant_Resume.pdf"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-5 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition"
-                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center gap-2 px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition transform hover:scale-105"
+                        whileHover={{ scale: 1.08 }}
                     >
                         <HiOutlineDocumentText className="text-xl" />
                         Resume

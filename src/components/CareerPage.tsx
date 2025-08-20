@@ -1,7 +1,7 @@
 import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
 import 'react-vertical-timeline-component/style.min.css';
 import { motion } from 'framer-motion';
-import { FaGraduationCap, FaChalkboardTeacher, FaRocket } from 'react-icons/fa';
+import { FaGraduationCap, FaChalkboardTeacher, FaRocket, FaSeedling } from 'react-icons/fa';
 
 const CareerPage = () => {
   return (
@@ -55,6 +55,22 @@ const CareerPage = () => {
           </p>
         </VerticalTimelineElement>
 
+        {/* 🆕 Software Intern @ Todd */}
+        <VerticalTimelineElement
+          className="vertical-timeline-element--work"
+          contentStyle={{ background: '#1e293b', color: '#fff' }}
+          contentArrowStyle={{ borderRight: '7px solid #1e293b' }}
+          date="Summer–Fall 2025"
+          iconStyle={{ background: '#059669', color: '#fff' }} // emerald-600 vibe for agriculture
+          icon={<FaSeedling />}
+        >
+          <h3 className="vertical-timeline-element-title font-bold text-lg">Software Intern</h3>
+          <h4 className="vertical-timeline-element-subtitle text-blue-400">Todd • Remote/Hybrid</h4>
+          <p className="text-white/90">
+            Selected for Todd’s Summer–Fall Internship Program to build software in the agriculture space. Contributed to cross‑department projects that supported client needs and business objectives, participated in in‑house education on ag fundamentals, and collaborated with mentors and senior leaders. Responsibilities spanned frontend design and implentation for website and dashboard, research & analysis, and coordination with partnerships & client services.
+          </p>
+        </VerticalTimelineElement>
+
         <VerticalTimelineElement
           className="vertical-timeline-element--future"
           contentStyle={{ background: '#1e293b', color: '#fff' }}
@@ -62,18 +78,19 @@ const CareerPage = () => {
           date="Now"
           iconStyle={{ background: '#f59e0b', color: '#fff' }}
           icon={<FaRocket />}
+          position="right"
         >
           <h3 className="vertical-timeline-element-title font-bold text-lg">To Be Continued…</h3>
-          <h4 className="vertical-timeline-element-subtitle text-blue-400">Seeking Software Engineer Internship</h4>
+          <h4 className="vertical-timeline-element-subtitle text-blue-400">Seeking Full-Time Software Engineering Positions</h4>
           <p>
-            Actively applying for roles in software engineering to continue my growth in a real-world tech environment and make meaningful impact.
+            Actively applying for full-time positions in software engineering to continue my growth in a real-world tech environment and make meaningful impact.
           </p>
         </VerticalTimelineElement>
       </VerticalTimeline>
 
       <div className="flex justify-center mt-10">
         <a
-          href="/resume.pdf"
+          href="/Oliphant_Resume.pdf"
           className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-all"
         >
           View My Resume
